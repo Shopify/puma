@@ -38,6 +38,14 @@ development files are installed on the system.
 If the system does not have OpenSSL development files installed, Puma will
 install/compile, but it will not allow ssl connections.
 
+Precompiled platform gems are built without SSL support, so they carry no
+dependency on the system's OpenSSL. To use Puma's built-in SSL, install the
+source gem instead, which compiles against your system's OpenSSL:
+
+```ruby
+gem "puma", force_ruby_platform: true
+```
+
 ## Frameworks
 
 ### Rails

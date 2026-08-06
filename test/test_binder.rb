@@ -517,6 +517,33 @@ class TestBinderSingle < TestBinderBase
   end
 end
 
+class TestBinderSSLUnavailable < TestBinderBase
+  def test_parse_ssl_precompiled_raises_force_ruby_platform_error
+    skip_if :ssl
+
+    Puma.stub_const(:PRECOMPILED_EXTENSION, true) do
+      error = assert_raises(RuntimeError) do
+        @binder.parse ["ssl://127.0.0.1:0?key=k&cert=c"], @log_writer
+      end
+
+      assert_includes error.message, "precompiled puma gem is built without SSL support"
+      assert_includes error.message, 'gem "puma", force_ruby_platform: true'
+    end
+  end
+
+  def test_parse_ssl_source_raises_generic_message
+    skip_if :ssl
+
+    Puma.stub_const(:PRECOMPILED_EXTENSION, false) do
+      error = assert_raises(RuntimeError) do
+        @binder.parse ["ssl://127.0.0.1:0?key=k&cert=c"], @log_writer
+      end
+
+      assert_equal "Puma compiled without SSL support", error.message
+    end
+  end
+end
+
 class TestBinderJRuby < TestBinderBase
   def test_binder_parses_jruby_ssl_options
     skip_unless :ssl

@@ -227,7 +227,7 @@ module Puma
         when "ssl"
           cert_key = %w[cert key]
 
-          raise "Puma compiled without SSL support" unless HAS_SSL
+          Puma.require_ssl!
 
           params = Util.parse_query uri.query
 
@@ -363,7 +363,7 @@ module Puma
     def add_ssl_listener(host, port, ctx,
                          optimize_for_latency=true, backlog=1024)
 
-      raise "Puma compiled without SSL support" unless HAS_SSL
+      Puma.require_ssl!
       # Puma will try to use local authority context if context is supplied nil
       ctx ||= localhost_authority_context
 
@@ -392,7 +392,7 @@ module Puma
     end
 
     def inherit_ssl_listener(fd, ctx)
-      raise "Puma compiled without SSL support" unless HAS_SSL
+      Puma.require_ssl!
       # Puma will try to use local authority context if context is supplied nil
       ctx ||= localhost_authority_context
 

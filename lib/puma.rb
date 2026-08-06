@@ -8,8 +8,17 @@ require 'stringio'
 
 require 'thread'
 
-# use require, see https://github.com/puma/puma/pull/2381
-require 'puma/puma_http11'
+begin
+  # Load the precompiled version of the library
+  ruby_version = /(\d+\.\d+)/.match(RUBY_VERSION)
+  require "puma/#{ruby_version}/puma_http11"
+  Puma::PRECOMPILED_EXTENSION = true
+rescue LoadError
+  # It's important to leave for users that can not or don't want to use the gem with precompiled binaries.
+  # use require, see https://github.com/puma/puma/pull/2381
+  require 'puma/puma_http11'
+  Puma::PRECOMPILED_EXTENSION = false
+end
 
 require_relative 'puma/detect'
 require_relative 'puma/json_serialization'
@@ -40,6 +49,18 @@ module Puma
 
   def self.ssl?
     HAS_SSL
+  end
+
+  def self.require_ssl!
+    return if HAS_SSL
+
+    if PRECOMPILED_EXTENSION
+      raise "This precompiled puma gem is built without SSL support. " \
+        "To use Puma's built-in SSL/TLS, install the source gem instead: add " \
+        "`gem \"puma\", force_ruby_platform: true` to your Gemfile"
+    else
+      raise "Puma compiled without SSL support"
+    end
   end
 
   def self.abstract_unix_socket?

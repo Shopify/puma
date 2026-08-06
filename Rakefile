@@ -107,7 +107,7 @@ else
     ENV["MAKEFLAGS"] = original_makeflags
   end
 
-  task :test => [:compile_for_test]
+  task :test => [:compile_for_test] unless ENV["PUMA_SKIP_LOCAL_COMPILE"] == "1"
 end
 
 task :default => [:rubocop, :test]
